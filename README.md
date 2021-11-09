@@ -1,4 +1,5 @@
 # devops-netology
+2nd line from PyCharm
 new line
 terraform\.gitignore
 **/.terraform/*
