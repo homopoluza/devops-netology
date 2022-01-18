@@ -64,6 +64,8 @@ vagrant@vagrant:~$ cat test.example.com.crt | jq -r .data.private_key > test.exa
 ```
 ## 5. Установите корневой сертификат созданного центра сертификации в доверенные в хостовой системе.
 
+![alt text](https://github.com/homopoluza/devops-netology/blob/main/midterm/cert1.png)  
+![alt text](https://github.com/homopoluza/devops-netology/blob/main/midterm/cert.png)
 
 ## 6. Установите nginx
 ```
