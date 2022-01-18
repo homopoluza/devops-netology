@@ -1,0 +1,160 @@
+3. Установите apache2, сгенерируйте самоподписанный сертификат, настройте тестовый сайт для работы по HTTPS.
+
+sudo apt update
+sudo apt install apache2
+sudo ufw allow "Apache Full"
+sudo a2enmod ssl
+sudo systemctl restart apache2
+
+vagrant@vagrant:/$ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
+Generating a RSA private key
+.................+++++
+....+++++
+writing new private key to '/etc/ssl/private/apache-selfsigned.key'
+-----
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:RU
+State or Province Name (full name) [Some-State]:Saint_Petersburg
+Locality Name (eg, city) []:Saint_Petersburg
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:netology
+Organizational Unit Name (eg, section) []:devops
+Common Name (e.g. server FQDN or YOUR name) []:Dmitry_Bazhin
+Email Address []:georgivsvi@mail.ru
+
+vagrant@vagrant:/$ sudo nano /etc/apache2/sites-available/Dmitry_Bazhin.conf
+
+<VirtualHost *:443>
+   ServerName Dmitry_Bazhin
+   DocumentRoot /var/www/Dmitry_Bazhin
+
+   SSLEngine on
+   SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt
+   SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
+</VirtualHost>
+
+vagrant@vagrant:/var/www$ sudo mkdir /var/www/Dmitry_Bazhin
+vagrant@vagrant:/var/www$ sudo nano /var/www/Dmitry_Bazhin/index.html
+
+<h1>it worked!</h1>
+
+sudo a2ensite your_domain_or_ip.conf
+sudo apache2ctl configtest
+sudo systemctl reload apache2
+
+vagrant@vagrant:/$ sudo apt install links
+ vagrant@vagrant:/$ links https://localhost
+
+                  it worked!
+4. Проверьте на TLS уязвимости произвольный сайт в интернете (кроме сайтов МВД, ФСБ, МинОбр, НацБанк, РосКосмос, РосАтом, РосНАНО и любых госкомпаний, объектов КИИ, ВПК ... и тому подобное).
+
+vagrant@vagrant:/testssl.sh$ ./testssl.sh -U --sneaky https://www.netology.ru/
+
+--------------------------------------------------
+Done testing now all IP addresses (on port 443): 104.22.40.171 172.67.21.207 104.22.41.171
+
+5. Установите на Ubuntu ssh сервер, сгенерируйте новый приватный ключ. Скопируйте свой публичный ключ на другой сервер. Подключитесь к серверу по SSH-ключу
+
+Vagrantfile:
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "bento/ubuntu-20.04"
+  config.vm.define "server"
+  config.vm.network "private_network", ip: "192.168.56.10"
+end
+
+Вторая машина client c ip 192.168.56.20
+
+vagrant@vagrant:~$ sudo apt install openssh-server -y
+Reading package lists... Done
+Building dependency tree
+Reading state information... Done
+openssh-server is already the newest version (1:8.2p1-4ubuntu0.2).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+vagrant@vagrant:~$ sudo systemctl enable ssh
+Synchronizing state of ssh.service with SysV service script with /lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install enable ssh
+vagrant@vagrant:~$ sudo systemctl start ssh
+vagrant@vagrant:~$ ssh-keygen
+Generating public/private rsa key pair.
+Enter file in which to save the key (/home/vagrant/.ssh/id_rsa):
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /home/vagrant/.ssh/id_rsa
+Your public key has been saved in /home/vagrant/.ssh/id_rsa.pub
+The key fingerprint is:
+SHA256:igAOFz0LAq6hv+loQMRk10x85n80OEmVVp+v9wyC0c0 vagrant@vagrant
+The key's randomart image is:
++---[RSA 3072]----+
+|=o.o=.    ..o.   |
+|+oo.o+ o . o  . .|
+|=o.. o+ . +    o |
+|==  .  . + + o  .|
+|+..     S + o E .|
+|.. . . . . +   . |
+|. . . .   o . o .|
+| o o         . +.|
+|o.+             o|
++----[SHA256]-----+
+vagrant@vagrant:~$ ssh-copy-id 192.168.56.20
+/usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: "/home/vagrant/.ssh/id_rsa.pub"
+The authenticity of host '192.168.56.20 (192.168.56.20)' can't be established.
+ECDSA key fingerprint is SHA256:wSHl+h4vAtTT7mbkj2lbGyxWXWTUf6VUliwpncjwLPM.
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+vagrant@192.168.56.20's password:
+
+Number of key(s) added: 1
+
+Now try logging into the machine, with:   "ssh '192.168.56.20'"
+and check to make sure that only the key(s) you wanted were added.
+
+vagrant@vagrant:~$ ssh '192.168.56.20'
+Welcome to Ubuntu 20.04.2 LTS (GNU/Linux 5.4.0-80-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/advantage
+
+  System information as of Sat 08 Jan 2022 08:58:36 PM UTC
+
+  System load:  0.0               Processes:             105
+  Usage of /:   2.3% of 61.31GB   Users logged in:       1
+  Memory usage: 15%               IPv4 address for eth0: 10.0.2.15
+  Swap usage:   0%                IPv4 address for eth1: 192.168.56.20
+
+
+This system is built by the Bento project by Chef Software
+More information can be found at https://github.com/chef/bento
+Last login: Sat Jan  8 20:43:51 2022 from 10.0.2.2
+
+6. Переименуйте файлы ключей из задания 5. Настройте файл конфигурации SSH клиента, так чтобы вход на удаленный сервер осуществлялся по имени сервера.
+
+vagrant@vagrant:~/.ssh$ nano config
+
+Host test
+HostName 192.168.56.20
+User vagrant
+Port 22
+IdentityFile ~/.ssh/id_rsa
+
+vagrant@vagrant:~/.ssh$ ssh test
+Welcome to Ubuntu 20.04.2 LTS (GNU/Linux 5.4.0-80-generic x86_64)
+
+7. Соберите дамп трафика утилитой tcpdump в формате pcap, 100 пакетов. Откройте файл pcap в Wireshark.
+
+vagrant@vagrant:~$ sudo tcpdump -i eth0  -c 100 -v -w 1.pcap
+tcpdump: listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes
+100 packets captured
+100 packets received by filter
+0 packets dropped by kernel
+
+
+

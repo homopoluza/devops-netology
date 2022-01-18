@@ -1,0 +1,79 @@
+1. Ознакомьтесь с графическим интерфейсом VirtualBox, посмотрите как выглядит виртуальная машина, которую создал для вас Vagrant, какие аппаратные ресурсы ей выделены. Какие ресурсы выделены по-умолчанию?
+
+1024 МB RAM
+2 CPU
+4 MB Video RAM
+64 GB Storage
+
+2. Как добавить оперативной памяти или ресурсов процессора виртуальной машине?
+
+config.vm.provider "virtualbox" do |v|
+  v.memory = 1024
+  v.cpus = 2
+end
+
+3. Kакой переменной можно задать длину журнала history, и на какой строчке manual это описывается?
+
+ The value of the HISTSIZE variable is used as the number of commands to save in a history list.  The text of the last  HISTSIZE  commands
+       (default  500)  is  saved.
+
+ Manual page bash(1) line 2602/3911 67% (press h for help or q to quit)
+
+4. Что делает директива ignoreboth в bash?
+
+Сокращение для игнорирование дубликатов и команд, начинающихся с пробелов.
+
+ A value of ignoreboth is shorthand for ignorespace and ignoredups.
+
+ Manual page bash(1) line 713 (press h for help or q to quit)
+
+5. В каких сценариях использования применимы скобки {} и на какой строчке man bash это описано?
+
+Составные комманды в фигурных скобках применяются в контексте текущей оболочки.
+
+ { list; }
+              list  is simply executed in the current shell environment.  list must be terminated with a newline or semicolon.  This is known as a group
+              command.  The return status is the exit status of list.  Note that unlike the metacharacters ( and ), { and } are reserved words and  must
+              occur  where  a  reserved  word  is permitted to be recognized.  Since they do not cause a word break, they must be separated from list by
+              whitespace or another shell metacharacter.
+
+ Manual page bash(1) line 230/3911 6% (press h for help or q to quit)
+
+6. Как создать однократным вызовом touch 100000 файлов? Получится ли аналогичным образом создать 300000? Если нет, то почему?
+
+touch file{1..100000}
+
+Создание 300000 файлов вызовет Argument list too long. 
+ulimit -S -s unlimited
+Уберет ограничение на размер стека.
+
+7.В man bash поищите по /\[\[. Что делает конструкция [[ -d /tmp ]]?
+
+ Return a status of 0 or 1 depending on the evaluation of the conditional expression expression.
+Manual page bash(1) line 240/3911 7% (press h for help or q to quit)
+
+Возвращает 0 или 1 в зависимости, существует ли директория /tmp или нет.
+
+8. Добейтесь в выводе type -a bash в виртуальной машине наличия первым пунктом в списке:
+$ cd /tmp/
+$ mkdir new_path_directory
+$ cp bash /tmp/new_path_directory
+$ $ export PATH=/tmp/new_path_directory:$PATH
+$ type -a bash
+bash is /tmp/new_path_directory/bash
+bash is /usr/bin/bash
+bash is /bin/bash
+
+9.Чем отличается планирование команд с помощью batch и at?
+
+$ man at
+
+ at      executes commands at a specified time.
+
+ batch   executes commands when system load levels permit; in  other
+               words,  when the load average drops below 1.5, or the value
+               specified in the invocation of atd.
+
+at выполняет комманды из стандартного ввода или файлы в указанное время.
+batch выполняет комманды, когда средняя загрузка меньше 1.5
+

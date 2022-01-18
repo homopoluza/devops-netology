@@ -1,0 +1,87 @@
+1. Подключитесь утилитой телнет к сайту stackoverflow.com
+
+ telnet stackoverflow.com 80
+Trying 151.101.193.69...
+Connected to stackoverflow.com.
+Escape character is '^]'.
+GET /questions HTTP/1.0
+HOST: stackoverflow.com
+
+HTTP/1.1 301 Moved Permanently
+cache-control: no-cache, no-store, must-revalidate
+location: https://stackoverflow.com/questions
+x-request-guid: 25b28742-2702-4b90-bea5-1b9741abb2f9
+feature-policy: microphone 'none'; speaker 'none'
+content-security-policy: upgrade-insecure-requests; frame-ancestors 'self' https://stackexchange.com
+Accept-Ranges: bytes
+Date: Wed, 29 Dec 2021 10:40:33 GMT
+Via: 1.1 varnish
+Connection: close
+X-Served-By: cache-hel1410033-HEL
+X-Cache: MISS
+X-Cache-Hits: 0
+X-Timer: S1640774433.049420,VS0,VE218
+Vary: Fastly-SSL
+X-DNS-Prefetch-Control: off
+Set-Cookie: prov=331e0e11-c030-bc18-b96e-c9aad1a7c482; domain=.stackoverflow.com; expires=Fri, 01-Jan-2055 00:00:00 GMT; path=/; HttpOnly
+
+Connection closed by foreign host.
+
+Мы видим ошибку 301. Означает, что ресурс перемещен. В поле location находится новый адрес.
+
+2. Повторите задание 1 в браузере, используя консоль разработчика F12 
+
+Загрузка страницы заняла 251 мс, 139 мс из которых было ожидание ответа сервера TTFB, самый долгий временной промежуток. 21 ms collect гугловская аналитика
+
+3. Какой IP адрес у вас в интернете?
+
+5.18.199.65
+
+4. Какому провайдеру принадлежит ваш IP адрес? Какой автономной системе AS?
+
+descr:          Z-Telecom
+origin:         AS41733
+
+5. Через какие сети проходит пакет, отправленный с вашего компьютера на адрес 8.8.8.8? Через какие AS? 
+
+ traceroute -IAn 8.8.8.8
+traceroute to 8.8.8.8 (8.8.8.8), 30 hops max, 60 byte packets
+ 1  10.0.2.2 [*]  0.570 ms  0.546 ms  0.537 ms
+ 2  192.168.0.1 [*]  3.868 ms  4.284 ms  4.684 ms
+ 3  213.110.196.42 [AS47111]  23.689 ms  24.057 ms  23.988 ms
+ 4  5.18.6.241 [AS41733]  4.578 ms  4.944 ms  4.935 ms
+ 5  188.234.131.158 [AS9049]  5.188 ms  5.185 ms  5.428 ms
+ 6  188.234.131.159 [AS9049]  5.179 ms  4.679 ms  6.463 ms
+ 7  74.125.244.129 [AS15169]  6.660 ms  4.698 ms  4.630 ms
+ 8  74.125.244.132 [AS15169]  4.234 ms  4.181 ms  8.555 ms
+ 9  142.251.61.219 [AS15169]  13.677 ms  14.447 ms  14.420 ms
+10  216.239.63.27 [AS15169]  14.654 ms  14.612 ms  13.967 ms
+11  * * *
+12  * * *
+13  * * *
+14  * * *
+15  * * *
+16  * * *
+17  * * *
+18  * * *
+19  * * *
+20  8.8.8.8 [AS15169]  11.400 ms  12.364 ms  12.232 ms
+
+6. Повторите задание 5 в утилите mtr. На каком участке наибольшая задержка - delay?
+
+ Host                                                                                                            Loss%   Snt   Last   Avg  Best  Wrst StDev
+ 
+ 3. ip-196-042.users.r2tv.ru                                                                                      0.0%    54    7.0  14.2   3.6  84.8  16.9
+
+7. Какие DNS сервера отвечают за доменное имя dns.google? Какие A записи? воспользуйтесь утилитой dig
+
+dns.google.             853     IN      A       8.8.4.4
+dns.google.             853     IN      A       8.8.8.8
+
+8. Проверьте PTR записи для IP адресов из задания 7. Какое доменное имя привязано к IP? воспользуйтесь утилитой dig
+
+ dig -x 8.8.4.4
+ANSWER SECTION:
+4.4.8.8.in-addr.arpa.   6924    IN      PTR     dns.google.
+
+

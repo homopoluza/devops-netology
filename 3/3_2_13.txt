@@ -1,0 +1,76 @@
+vagrant@vagrant:~$ sleep 1h
+^Z
+[1]+  Stopped                 sleep 1h
+vagrant@vagrant:~$ bg
+[1]+ sleep 1h &
+vagrant@vagrant:~$ ps -a
+    PID TTY          TIME CMD
+   1438 pts/6    00:00:00 sleep
+   1439 pts/6    00:00:00 ps
+vagrant@vagrant:~$ disown sleep
+vagrant@vagrant:~$ screen
+
+vagrant@vagrant:~$ reptyr 1438 
+Unable to attach to pid 1438: Operation not permitted
+The kernel denied permission while attaching. If your uid matches
+the target's, check the value of /proc/sys/kernel/yama/ptrace_scope.
+For more information, see /etc/sysctl.d/10-ptrace.conf
+vagrant@vagrant:~$ sudo reptyr -T 1438 
+
+фриззит screen
+
+C echo 0|sudo tee /proc/sys/kernel/yama/ptrace_scope тоже самое
+
+vagrant@vagrant:~$ sudo vim /etc/sysctl.d/10-ptrace.conf
+vagrant@vagrant:~$ sudo sysctl -p /etc/sysctl.d/10-ptrace.conf
+kernel.yama.ptrace_scope = 0
+vagrant@vagrant:~$ sleep 1h
+^Z
+[1]+  Stopped                 sleep 1h
+vagrant@vagrant:~$ bg
+[1]+ sleep 1h &
+vagrant@vagrant:~$ ps -a
+    PID TTY          TIME CMD
+   1438 pts/6    00:00:00 sleep
+   1439 pts/6    00:00:00 ps
+vagrant@vagrant:~$ disown sleep
+vagrant@vagrant:~$ screen
+
+vagrant@vagrant:~$ reptyr 1438 
+
+Фриззит терминал
+
+После перезагрузки ВМ зароботало на примере top https://github.com/nelhage/reptyr#readme
+
+vagrant@vagrant:~$ bg
+[1]+ top &
+vagrant@vagrant:~$
+
+
+[1]+  Stopped                 top
+vagrant@vagrant:~$ jobs -l
+[1]+  1100 Stopped (signal)        top
+vagrant@vagrant:~$ disown top
+-bash: warning: deleting stopped job 1 with process group 1100
+vagrant@vagrant:~$ jobs -l
+vagrant@vagrant:~$ ps
+    PID TTY          TIME CMD
+   1093 pts/0    00:00:00 bash
+   1100 pts/0    00:00:00 top
+   1112 pts/0    00:00:00 ps
+vagrant@vagrant:~$ screen
+
+[detached from 1114.pts-0.vagrant]
+
+подключаемся заново
+
+vagrant ssh
+screen -r
+
+top продолжает работать.
+
+
+
+
+
+

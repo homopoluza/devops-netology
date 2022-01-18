@@ -1,0 +1,98 @@
+1. Какой системный вызов делает команда cd? 
+
+chdir("/tmp")                           = 0
+
+2. Используя strace выясните, где находится база данных file на основании которой она делает свои догадки.
+
+/usr/share/misc/magic.mgc
+
+3. Основываясь на знаниях о перенаправлении потоков предложите способ обнуления открытого удаленного файла (чтобы освободить место на файловой системе).
+
+: > /proc/<PID>/fd/1
+cat /dev/null > /proc/<PID>/fd/1
+echo -n > /proc/<PID>/fd/1
+sudo truncate -s 0 /proc/<PID>/fd/1
+
+4. Занимают ли зомби-процессы какие-то ресурсы в ОС (CPU, RAM, IO)?
+
+Зомби процессы завершили исполнение с системным вызовом exit, но все еще записаны в таблице процессов pc. Все ресурсы освобождены и доступны другим процессам.
+
+5. В iovisor BCC есть утилита opensnoop:
+
+root@vagrant:~# dpkg -L bpfcc-tools | grep sbin/opensnoop
+/usr/sbin/opensnoop-bpfcc
+
+На какие файлы вы увидели вызовы группы open за первую секунду работы утилиты?
+
+~$ sudo opensnoop-bpfcc
+PID    COMM               FD ERR PATH
+603    irqbalance          6   0 /proc/interrupts
+603    irqbalance          6   0 /proc/stat
+603    irqbalance          6   0 /proc/irq/20/smp_affinity
+603    irqbalance          6   0 /proc/irq/0/smp_affinity
+603    irqbalance          6   0 /proc/irq/1/smp_affinity
+603    irqbalance          6   0 /proc/irq/8/smp_affinity
+603    irqbalance          6   0 /proc/irq/12/smp_affinity
+603    irqbalance          6   0 /proc/irq/14/smp_affinity
+603    irqbalance          6   0 /proc/irq/15/smp_affinity
+
+6. Какой системный вызов использует uname -a? Приведите цитату из man по этому системному вызову, где описывается альтернативное местоположение в /proc, где можно узнать версию ядра и релиз ОС.
+
+uname({sysname="Linux", nodename="vagrant", ...}) = 0
+
+vagrant@vagrant:~$ man 2 uname
+Part of the utsname information is also accessible via /proc/sys/kernel/{ostype, hostname, osrelease, version, domainname}.
+
+7.1. Чем отличается последовательность команд через ; и через && в bash?
+
+root@netology1:~# test -d /tmp/some_dir; echo Hi
+Hi
+root@netology1:~# test -d /tmp/some_dir && echo Hi
+root@netology1:~#
+
+В примере с && команда справа от амперсандов будет исполнена только в случае корректного завершения команды слева.
+
+7.2. Есть ли смысл использовать в bash &&, если применить set -e?
+
+-e  Exit immediately if a command exits with a non-zero status.
+
+Смысл использовать имеет:
+
+vagrant@vagrant:~$ set -e
+vagrant@vagrant:~$ ls /no ; ls
+ls: cannot access '/no': No such file or directory
+Connection to 127.0.0.1 closed.
+PS C:\hashicorp\devops>
+
+vagrant@vagrant:~$ set -e
+vagrant@vagrant:~$ ls /no && ls
+ls: cannot access '/no': No such file or directory
+vagrant@vagrant:~$
+vagrant@vagrant:~$ ls /no
+ls: cannot access '/no': No such file or directory
+Connection to 127.0.0.1 closed.
+PS C:\hashicorp\devops>
+
+Т.е. команды, объединенные &&, считаются единым выражением.
+
+8. Из каких опций состоит режим bash set -euxo pipefail и почему его хорошо было бы использовать в сценариях?
+
+ -e  Exit immediately if a command exits with a non-zero status.
+ -u  Treat unset variables as an error when substituting.
+ -x  Print commands and their arguments as they are executed.
+ -o option-name
+ pipefail     the return value of a pipeline is the status of
+                           the last command to exit with a non-zero status,
+                           or zero if no command exited with a non-zero status
+
+Этот режим выходит из шелла при любых ошибках и необъявленных переменных, при этом печатает все команды по мере исполнения. Возвращает статус последней команды пайпа, которая завершилась не нулем, или ноль, если все команды завершились штатно. 
+
+9. Используя -o stat для ps, определите, какой наиболее часто встречающийся статус у процессов в системе.
+
+vagrant@vagrant:~$ ps -o stat
+STAT
+Ss
+R+
+
+Ss - sleeping session leader
+R+ - running in the foreground process group

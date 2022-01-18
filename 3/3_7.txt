@@ -1,0 +1,116 @@
+1. Проверьте список доступных сетевых интерфейсов на вашем компьютере. Какие команды есть для этого в Linux и в Windows?
+
+Linux: ip a
+Windows: ipconfig
+
+2. Какой протокол используется для распознавания соседа по сетевому интерфейсу? Какой пакет и команды есть в Linux для этого?
+
+LLDP
+lldpd
+
+vagrant@vagrant:~$ sudo apt install lldpd --ignore-missing
+Reading package lists... Done
+Building dependency tree
+Reading state information... Done
+The following additional packages will be installed:
+  libmysqlclient21 libsensors-config libsensors5 libsnmp-base libsnmp35 mysql-common
+Suggested packages:
+  lm-sensors snmp-mibs-downloader snmpd
+The following NEW packages will be installed:
+  libmysqlclient21 libsensors-config libsensors5 libsnmp-base libsnmp35 lldpd mysql-common
+0 upgraded, 7 newly installed, 0 to remove and 0 not upgraded.
+Need to get 1,228 kB/2,607 kB of archives.
+After this operation, 12.5 MB of additional disk space will be used.
+Do you want to continue? [Y/n] y
+Ign:1 http://archive.ubuntu.com/ubuntu focal-updates/main amd64 libmysqlclient21 amd64 8.0.26-0ubuntu0.20.04.2
+Err:1 http://security.ubuntu.com/ubuntu focal-updates/main amd64 libmysqlclient21 amd64 8.0.26-0ubuntu0.20.04.2
+  404  Not Found [IP: 91.189.88.142 80]
+Unable to correct missing packages.
+E: Failed to fetch http://security.ubuntu.com/ubuntu/pool/main/m/mysql-8.0/libmysqlclient21_8.0.26-0ubuntu0.20.04.2_amd64.deb  404  Not Found [IP: 91.189.88.142 80]
+E: Aborting install.
+
+3. Какая технология используется для разделения L2 коммутатора на несколько виртуальных сетей? Какой пакет и команды есть в Linux для этого? Приведите пример конфига.
+
+vlan
+
+Для того чтобы информация о созданных VLAN'ах сохранилась после перезагрузки, необходимо добавить её в файл /etc/network/interfaces.
+
+Например:
+
+auto vlan1400
+iface vlan1400 inet static
+        address 192.168.1.1
+        netmask 255.255.255.0
+        vlan_raw_device eth0
+
+4. Какие типы агрегации интерфейсов есть в Linux? Какие опции есть для балансировки нагрузки? Приведите пример конфига.
+
+Статический и динамический.  Использование LACP обеспечит равномерную балансировку нагрузки между физическими сетевыми интерфейсами сервера.  
+ifenslave
+/etc/network/interfaces
+
+auto bond0
+
+iface bond0 inet static
+    address 10.31.1.5
+    netmask 255.255.255.0
+    network 10.31.1.0
+    gateway 10.31.1.254
+    bond-slaves eth0 eth1
+    bond-mode active-backup
+    bond-miimon 100
+    bond-downdelay 200
+    bond-updelay 200
+
+5. Сколько IP адресов в сети с маской /29 ? Сколько /29 подсетей можно получить из сети с маской /24. Приведите несколько примеров /29 подсетей внутри сети 10.10.10.0/24.
+
+ipcalc 10.10.10.0/29
+Hosts/Net: 6
+
+Изменяются первые 5 битов подсетей последнего октета. 2^5=32
+
+vagrant@vagrant:/$ ipcalc 10.10.10.0/24 /29
+Subnets:   32
+Hosts:     192
+
+10.10.10.240/29
+10.10.10.232/29
+10.10.10.64/29
+
+6. Задача: вас попросили организовать стык между 2-мя организациями. Диапазоны 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 уже заняты. Из какой подсети допустимо взять частные IP адреса? Маску выберите из расчета максимум 40-50 хостов внутри подсети.
+
+vagrant@vagrant:/$ ipcalc 100.64.0.0 -s 50
+Address:   100.64.0.0           01100100.01000000.00000000. 00000000
+Netmask:   255.255.255.0 = 24   11111111.11111111.11111111. 00000000
+Wildcard:  0.0.0.255            00000000.00000000.00000000. 11111111
+=>
+Network:   100.64.0.0/24        01100100.01000000.00000000. 00000000
+HostMin:   100.64.0.1           01100100.01000000.00000000. 00000001
+HostMax:   100.64.0.254         01100100.01000000.00000000. 11111110
+Broadcast: 100.64.0.255         01100100.01000000.00000000. 11111111
+Hosts/Net: 254                   Class A
+
+1. Requested size: 50 hosts
+Netmask:   255.255.255.192 = 26 11111111.11111111.11111111.11 000000
+Network:   100.64.0.0/26        01100100.01000000.00000000.00 000000
+HostMin:   100.64.0.1           01100100.01000000.00000000.00 000001
+HostMax:   100.64.0.62          01100100.01000000.00000000.00 111110
+Broadcast: 100.64.0.63          01100100.01000000.00000000.00 111111
+Hosts/Net: 62                    Class A
+
+Needed size:  64 addresses.
+Used network: 100.64.0.0/26
+Unused:
+100.64.0.64/26
+100.64.0.128/25
+
+7. Как проверить ARP таблицу в Linux, Windows? Как очистить ARP кеш полностью? Как из ARP таблицы удалить только один нужный IP?
+
+Linux: ip neigh
+Windows: arp -a(-g)
+
+sudo ip neigh flush all
+
+arp -d 192.168.1.1
+
+
