@@ -150,4 +150,68 @@ sudo service nginx restart
 ```
 ## 8. Откройте в браузере на хосте https адрес страницы, которую обслуживает сервер nginx.
 
+![alt text](https://github.com/homopoluza/devops-netology/blob/main/midterm/https.png)
+
+## 9. Создайте скрипт, который будет генерировать новый сертификат в vault:
+* генерируем новый сертификат так, чтобы не переписывать конфиг nginx;
+* перезапускаем nginx для применения нового сертификата.
+
+### netology_cert.sh
+
+```sh
+ #!/usr/bin/env bash
+
+export VAULT_ADDR=http://127.0.0.1:8200
+export VAULT_TOKEN=root
+
+vault secrets enable pki
+vault secrets tune -max-lease-ttl=87600h pki
+
+vault write -field=certificate pki/root/generate/internal \
+     common_name="example.com" \
+     ttl=87600h > CA_cert.crt
+
+vault write pki/config/urls \
+     issuing_certificates="$VAULT_ADDR/v1/pki/ca" \
+     crl_distribution_points="$VAULT_ADDR/v1/pki/crl"
+
+vault secrets enable -path=pki_int pki
+vault secrets tune -max-lease-ttl=43800h pki_int
+
+vault write -format=json pki_int/intermediate/generate/internal \
+     common_name="example.com Intermediate Authority" \
+     | jq -r '.data.csr' > pki_intermediate.csr
+
+vault write -format=json pki/root/sign-intermediate csr=@pki_intermediate.csr \
+     format=pem_bundle ttl="43800h" \
+     | jq -r '.data.certificate' > intermediate.cert.pem
+
+vault write pki_int/intermediate/set-signed certificate=@intermediate.cert.pem
+
+vault write pki_int/roles/example-dot-com \
+     allowed_domains="example.com" \
+     allow_subdomains=true \
+     max_ttl="720h"
+
+vault write -format=json pki_int/issue/example-dot-com \
+      common_name="netology.example.com" ttl="720h" > netology.example.com.crt
+
+cat netology.example.com.crt | jq -r .data.certificate > netology.example.com.crt.pem
+cat netology.example.com.crt | jq -r .data.issuing_ca >> netology.example.com.crt.pem
+cat netology.example.com.crt | jq -r .data.private_key > netology.example.com.crt.key
+
+service nginx reload
+```
+
+## 10. Поместите скрипт в crontab, чтобы сертификат обновлялся какого-то числа каждого месяца в удобное для вас время.
+
+Обновление сертификата в первый день каждого месяца в 00:00:
+
+```
+vagrant@vagrant:~$ crontab -e
+
+0 0 1 * * /home/vagrant/netology_cert.sh
+```
+
+
 
