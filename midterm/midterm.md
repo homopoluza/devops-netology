@@ -9,6 +9,7 @@ vagrant ssh
 sudo ufw allow 22  
 sudo ufw allow 443  
 sudo ufw allow from 127.0.0.1
+sudo ufw enable
 ```
 
 ## 3. Установите hashicorp vault
@@ -56,11 +57,11 @@ vault write  pki_int/roles/example-dot-com \
      allow_subdomains=true \
      max_ttl="720h"
 
- vault write -format=json pki_int/issue/example-dot-com common_name="test.example.com" ttl="24h" > test.example.com.crt
+ vault write -format=json pki_int/issue/example-dot-com common_name="netology.example.com" ttl="24h" > netology.example.com.crt
 
-  vagrant@vagrant:~$  cat test.example.com.crt | jq -r .data.certificate > test.example.com.crt.pem
-vagrant@vagrant:~$ cat test.example.com.crt | jq -r .data.issuing_ca >> test.example.com.crt.pem
-vagrant@vagrant:~$ cat test.example.com.crt | jq -r .data.private_key > test.example.com.crt.key
+  vagrant@vagrant:~$  cat netology.example.com.crt | jq -r .data.certificate > netology.example.com.crt.pem
+vagrant@vagrant:~$ cat netology.example.com.crt | jq -r .data.issuing_ca > netology.example.com.crt.pem
+vagrant@vagrant:~$ cat netology.example.com.crt | jq -r .data.private_key > netology.example.com.crt.key
 ```
 ## 5. Установите корневой сертификат созданного центра сертификации в доверенные в хостовой системе.
 
@@ -76,9 +77,55 @@ sudo apt install nginx
 
 Создадим отдельную директорию для нашего домена, в которой будут содержаться настройки. Переназначим директорию для текущего пользователя и разрешения. 
 ```
-vagrant@vagrant:~$ sudo mkdir -p /var/www/test.example.com/html  
-vagrant@vagrant:~$ sudo chown -R $USER:$USER /var/www/test.example.com/html  
+vagrant@vagrant:~$ sudo mkdir -p /var/www/netology.example.com/html  
+vagrant@vagrant:~$ sudo chown -R $USER:$USER /var/www/netology.example.com/html  
 vagrant@vagrant:~$ sudo chmod -R 755 /var/www  
 ```
+Создадим тестовую страничку
+
+```
+nano /var/www/netology.example.com/html/index.html  
+
+<html>
+    <head>
+        <title>Welcome to your_domain!</title>
+    </head>
+    <body>
+  <h1>netology.example.com is working</h1>
+    </body>
+</html>
+```
+
+Настроим блок сервера согласно инструкции
+
+```
+sudo nano /etc/nginx/sites-available/netology.example.com  
+
+server {
+       listen 443 ssl;
+
+       server_name netology.example.com;
+
+       ssl_certificate /var/www/netology.example.com/ssl/netology.example.com.crt.pem;
+       ssl_certificate_key /var/www/netology.example.com/ssl/netology.example.com.crt.key;
+       ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+       ssl_ciphers         HIGH:!aNULL:!MD5;
+
+       root /var/www/netology.example.com/html;
+       index index.html;
+
+       location / {
+               try_files $uri $uri/ =404;
+       }
+}
+```
+```
+sudo ln -s /etc/nginx/sites-available/netology.example.com /etc/nginx/sites-enabled/
+vagrant@vagrant://var/www/netology.example.com/ssl$ sudo nginx -t
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+sudo service nginx restart
+```
+## 8. Откройте в браузере на хосте https адрес страницы, которую обслуживает сервер nginx.
 
 
