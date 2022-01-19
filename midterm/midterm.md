@@ -69,7 +69,7 @@ vault write  pki_int/roles/example-dot-com \
  vault write -format=json pki_int/issue/example-dot-com common_name="netology.example.com" ttl="24h" > netology.example.com.crt
 
   vagrant@vagrant:~$  cat netology.example.com.crt | jq -r .data.certificate > netology.example.com.crt.pem
-vagrant@vagrant:~$ cat netology.example.com.crt | jq -r .data.issuing_ca > netology.example.com.crt.pem
+vagrant@vagrant:~$ cat netology.example.com.crt | jq -r .data.issuing_ca >> netology.example.com.crt.pem
 vagrant@vagrant:~$ cat netology.example.com.crt | jq -r .data.private_key > netology.example.com.crt.key
 ```
 ## 5. Установите корневой сертификат созданного центра сертификации в доверенные в хостовой системе.
