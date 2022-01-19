@@ -114,7 +114,8 @@ server {
        listen 443 ssl;
 
        server_name netology.example.com;
-
+  
+       ssl on;
        ssl_certificate /var/www/netology.example.com/ssl/netology.example.com.crt.pem;
        ssl_certificate_key /var/www/netology.example.com/ssl/netology.example.com.crt.key;
        ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
