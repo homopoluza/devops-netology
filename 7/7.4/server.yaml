@@ -1,0 +1,18 @@
+repos:
+  - id: github.com/homopoluza
+    apply_requirements: [approved]
+    workflow: default
+    allowed_overrides: [workflow]
+
+workflows:
+  myworkflow:
+    plan:
+      steps:
+      - init:
+          extra_args: ["-lock=false"]
+      - plan:
+          extra_args: ["-lock=false"]
+    apply:
+      steps:
+      - apply:
+          extra_args: ["-lock=false"]
