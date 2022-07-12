@@ -54,9 +54,10 @@ vagrant@vagrant:/vagrant/tfc-getting-started$
 В качестве результата приложите ссылку на файлы `server.yaml` и `atlantis.yaml`.
 
 ```
-Пытался установить atlantis по офф. документации, но застрял на пункте Provider Credentials. На запрос в поиске "atlantis yandex cloud" выдаются сковорода atlantis на yandex market. 
+Пытался установить atlantis по офф. документации, но застрял на пункте Provider Credentials.
+На запрос в поиске "atlantis yandex cloud" выдаются сковорода atlantis на yandex market. 
 ```
-[server.yaml](./server.yaml)
+[server.yaml](./server.yaml)  
 [atlantis.yaml](./atlantis.yaml)
 
 
