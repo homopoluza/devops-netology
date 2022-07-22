@@ -1,0 +1,7 @@
+---
+  rev_proxy:
+    hosts:
+      homopoluza.ru:
+        ansible_host: 51.250.90.79
+        ansible_user: ubuntu
+        ansible_ssh_private_key_file: ~/.ssh/yc_rsa

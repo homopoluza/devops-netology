@@ -15,6 +15,7 @@ resource "yandex_compute_instance" "rev-proxy" {
   network_interface {
     subnet_id = yandex_vpc_subnet.subnet-1.id
     nat       = true
+    nat_ip_address = "51.250.90.79"
     ip_address = "192.168.10.10"
   }
 
