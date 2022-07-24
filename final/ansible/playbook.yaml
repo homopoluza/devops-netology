@@ -1,0 +1,6 @@
+---
+- name: rev-proxy
+  hosts: homopoluza.ru
+  remote_user: ubuntu
+  roles:
+    - rev_proxy

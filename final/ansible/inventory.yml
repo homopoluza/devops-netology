@@ -1,7 +1,45 @@
 ---
   rev_proxy:
     hosts:
-      homopoluza.ru:
+      {{ domaine_name }}:
         ansible_host: 51.250.90.79
-        ansible_user: ubuntu
-        ansible_ssh_private_key_file: ~/.ssh/yc_rsa
+        ansible_user: {{ user }}
+        ansible_ssh_private_key_file: {{ key_path }}
+  mysql:
+    hosts:
+      db01.{{ domaine_name }}:
+        ansible_host: 192.168.10.20
+        ansible_user: {{ user }}
+        ansible_ssh_private_key_file: {{ key_path }}
+        ansible_ssh_common_args: '-o ProxyCommand="ssh -W %h:%p -q {{ user }}@{{ domaine_name }}"'
+      db02.{{ domaine_name }}:
+        ansible_host: 192.168.10.30
+        ansible_user: {{ user }}
+        ansible_ssh_private_key_file: {{ key_path }}
+        ansible_ssh_common_args: '-o ProxyCommand="ssh -W %h:%p -q {{ user }}@{{ domaine_name }}"'
+  wordpress:
+    hosts:
+      app.{{ domaine_name }}:
+        ansible_host: 192.168.10.40
+        ansible_user: {{ user }}
+        ansible_ssh_private_key_file: {{ key_path }}
+        ansible_ssh_common_args: '-o ProxyCommand="ssh -W %h:%p -q {{ user }}@{{ domaine_name }}"'
+  gitlab:
+    hosts:
+      gitlab.{{ domaine_name }}:
+        ansible_host: 192.168.10.50
+        ansible_user: {{ user }}
+        ansible_ssh_private_key_file: {{ key_path }}
+        ansible_ssh_common_args: '-o ProxyCommand="ssh -W %h:%p -q {{ user }}@{{ domaine_name }}"'
+      runner.{{ domaine_name }}:
+        ansible_host: 192.168.10.60
+        ansible_user: {{ user }}
+        ansible_ssh_private_key_file: {{ key_path }}
+        ansible_ssh_common_args: '-o ProxyCommand="ssh -W %h:%p -q {{ user }}@{{ domaine_name }}"'
+  monitoring:
+    hosts:
+        monitoring.{{ domaine_name }}:
+          ansible_host: 192.168.10.70
+          ansible_user: {{ user }}
+          ansible_ssh_private_key_file: {{ key_path }}
+          ansible_ssh_common_args: '-o ProxyCommand="ssh -W %h:%p -q {{ user }}@{{ domaine_name }}"'
