@@ -1,6 +1,33 @@
 ---
-- name: rev-proxy
-  hosts: homopoluza.ru
+- hosts: rev_proxy
   remote_user: ubuntu
   roles:
-    - rev_proxy
+  - rev_proxy
+
+- hosts: mqsql
+  remote_user: ubuntu
+  roles:
+  - mysql
+
+- hosts: wordpress
+  remote_user: ubuntu
+  roles:
+  - wordpress
+
+- hosts: gitlab.homopoluza.ru
+  remote_user: ubuntu
+  roles:
+  - gitlab-ce
+
+- hosts: runner.homopoluza.ru
+  remote_user: ubuntu
+  roles:
+  - gitlab-runner
+
+- hosts: monitoring
+  remote_user: ubuntu
+  roles:
+  - node-exporter
+  - prometheus
+  - alertmanager
+  - grafana
