@@ -1,3 +1,43 @@
 ---
-domain_name: homopoluza.ru
-email: homopoluza@gmail.com
+nginx_revproxy_sites:
+  www.homopoluza.ru:
+    domains:
+      - www.homopoluza.ru
+      - homopoluza.ru
+    upstreams:
+      - { backend_address: 192.168.10.40, backend_port: 80 }
+    ssl: true
+    letsencrypt: true
+    letsencrypt_email: homopoluza@gmail.com
+  gitlab.homopoluza.ru:
+    domains:
+      - gitlab.homopoluza.ru
+    upstreams:
+      - { backend_address: 192.168.10.50, backend_port: 80 }
+    ssl: true
+    letsencrypt: true
+    letsencrypt_email: homopoluza@gmail.com
+  grafana.homopoluza.ru:
+    domains:
+      - grafana.homopoluza.ru
+    upstreams:
+      - { backend_address: 192.168.10.70, backend_port: 3000 }
+    ssl: true
+    letsencrypt: true
+    letsencrypt_email: homopoluza@gmail.com
+  prometheus.homopoluza.ru:
+    domains:
+      - prometheus.homopoluza.ru
+    upstreams:
+      - { backend_address: 192.168.10.70 , backend_port: 9090 }
+    ssl: true
+    letsencrypt: true
+    letsencrypt_email: homopoluza@gmail.com
+  alertmanager.homopoluza.ru:
+    domains:
+      - alertmanager.homopoluza.ru
+    upstreams:
+      - { backend_address: 192.168.10.70, backend_port: 9093 }
+    ssl: true
+    letsencrypt: true
+    letsencrypt_email: homopoluza@gmail.com

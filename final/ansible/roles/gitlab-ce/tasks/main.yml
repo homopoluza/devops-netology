@@ -15,6 +15,7 @@
   package:
     name: "{{ gitlab_dependencies }}"
     state: present
+    update_cache: yes
 
 - name: Install GitLab dependencies (Debian).
   apt:

@@ -1,6 +1,7 @@
 ---
 - name: Load platform-specific variables
   include_vars: "{{ lookup('first_found', possible_files) }}"
+  #ignore_errors: yes
   vars:
     possible_files:
       files:

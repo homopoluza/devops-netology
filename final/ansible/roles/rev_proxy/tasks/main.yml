@@ -1,39 +1,131 @@
 ---
-- name: install nginx
+- name: Update apt cache
   become: true
-  ansible.builtin.apt:
-    name: nginx
+  apt: update_cache=yes cache_valid_time=3600
+
+- name: Install Nginx and ssl-cert
+  become: true
+  apt:
+    name:
+      - nginx
+      - ssl-cert
     state: present
-    update_cache: yes
-  register: nginx_installed
+  register:
+    nginxinstalled
+  delay: 10
+  retries: 12
+  until: nginxinstalled is successful
 
-- name: remove default virtual host configuration
+- name: Install python-passlib for Python 3
   become: true
-  ansible.builtin.file:
-    path: /etc/nginx/sites-enabled/default
-    state: absent
-  notify: stop nginx
-
-- name: install certbot
-  become: true
-  ansible.builtin.apt:
-    name: certbot
+  apt:
+    name:
+      - "python3-passlib"
     state: present
+  register:
+    result
+  delay: 10
+  retries: 12
+  until: result is successful
+  when:
+    - ansible_python['version']['major'] == 3
 
-- name: install certbot's nginx plugin
+- name: Set up nginx directories
   become: true
-  ansible.builtin.apt:
-    name: python3-certbot-nginx
-    state: present
+  file:
+    path: "/etc/nginx/{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0640
+  with_items:
+    - sites-available
+    - sites-enabled
 
-- name: install test certs
-  become: yes
-  ansible.builtin.command: "certbot certonly --nginx --test-cert --agree-tos --no-eff-email -q --email {{ email }} -d {{ domain_name }} -d www.{{ domain_name }} -d gitlab.{{ domain_name }} -d grafana.{{ domain_name }} -d prometheus.{{ domain_name }} -d alertmanager.{{ domain_name }}"
-
-- name: create vhost files from template
+- name: Add Site Config
   become: true
-  ansible.builtin.template:
-    src: templates/sites.conf.j2
-    dest: /etc/nginx/sites-enabled/{{ item.fqdn }}.conf
-  with_items: "{{ servers }}"
-  notify: reload nginx
+  template:
+    src: reverseproxy.conf.j2
+    dest: /etc/nginx/sites-available/{{ item.key }}.conf
+    owner: root
+    group: root
+    mode: 0640
+  with_dict: "{{ nginx_revproxy_sites }}"
+  register:
+    siteconfig
+  when:
+    - nginxinstalled is success
+    - not item.value.ssl | default(True)
+    - not item.value.letsencrypt | default(True)
+
+- name: Add Https Site Config
+  become: true
+  template:
+    src: reverseproxy_ssl.conf.j2
+    dest: /etc/nginx/sites-available/{{ item.key }}.conf
+    owner: root
+    group: root
+    mode: 0640
+  with_dict: "{{ nginx_revproxy_sites }}"
+  register:
+    siteconfig
+  when:
+    - nginxinstalled is success
+    - item.value.ssl | default(False)
+    - not item.value.letsencrypt | default(True)
+
+- name: Get Active Sites
+  become: true
+  command: ls -1 /etc/nginx/sites-enabled/
+  changed_when: "active.stdout_lines != nginx_revproxy_sites.keys()|sort()"
+  check_mode: false
+  register: active
+
+- name: Enable Site Config
+  become: true
+  file:
+    src: /etc/nginx/sites-available/{{ item.key }}.conf
+    dest: /etc/nginx/sites-enabled/{{ item.key }}
+    state: link
+  with_dict: "{{ nginx_revproxy_sites }}"
+  notify: Reload Nginx
+  when:
+    - siteconfig is success
+    - not item.value.letsencrypt | default(True)
+    - not ansible_check_mode
+
+- name: Create WebRoot sites
+  become: true
+  file:
+    dest: /var/www/{{ item.key }}/.well-known
+    mode: 0775
+    state: directory
+    owner: www-data
+    group: www-data
+  with_dict: "{{ nginx_revproxy_sites }}"
+  notify: Reload Nginx
+  when:
+    - nginxinstalled is success
+
+- name: WebRoot Permissions Sites
+  become: true
+  file:
+    dest: /var/www/{{ item.key }}
+    mode: 0775
+    state: directory
+    owner: www-data
+    group: www-data
+    recurse: true
+  with_dict: "{{ nginx_revproxy_sites }}"
+  notify: Reload Nginx
+  when:
+    - nginxinstalled is success
+
+- name: Get WebRoot Sites
+  become: true
+  command: ls -1 /var/www/
+  changed_when: "webroot.stdout_lines != nginx_revproxy_sites.keys()|sort()"
+  check_mode: false
+  register: webroot
+
+- include_tasks: letsencrypt.yml

@@ -2,3 +2,4 @@
 domain_name: homopoluza.ru
 user: ubuntu
 key_path: ~/.ssh/id_rsa
+email: homopoluza@gmail.com

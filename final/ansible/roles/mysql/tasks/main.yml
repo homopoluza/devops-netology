@@ -1,56 +1,26 @@
 ---
-- name: install mysql
-  become: true
-  ansible.builtin.apt:
-    pkg: 
-      - mysql-server
-      - mysql-client
-    state: present
-    update_cache: yes
+# Variable configuration.
+- include_tasks: variables.yml
 
-- name: replace config file
-  become: true
-  ansible.builtin.template:
-    src: templates/mysqld.cnf
-    dest: /etc/mysql/mysql.conf.d/mysqld.cnf
-  notify: restart mysql
+# Setup/install tasks.
+- include_tasks: setup-RedHat.yml
+  when: ansible_os_family == 'RedHat'
 
-- name: change server-id for slave
-  ansible.builtin.replace:
-    path: /etc/mysql/mysql.conf.d/mysqld.cnf
-    regexp: 'server-id = 1'
-    replace: 'server-id = 2' 
-  when: inventory_hostname == db02.{{ domaine_name }}
+- include_tasks: setup-Debian.yml
+  when: ansible_os_family == 'Debian'
 
-- name: create replicator user
-  community.mysql.mysql_user:
-    name: replicator_user
-    host: 192.168.10.30
-    password: replica_password
-    priv: "*.*:REPLICATION SLAVE"
-    state: present
-  when: ansible_hostname == db01.{{ domaine_name }}
+- include_tasks: setup-Archlinux.yml
+  when: ansible_os_family == 'Archlinux'
 
-- name: setup the slave server to replicate the master server
-  community.mysql.mysql_replication:
-    mode: changemaster
-    master_host: db01.{{ domaine_name }}
-    master_user: replicator_user
-    master_password: replica_password
-  when: ansible_hostname == db02.{{ domaine_name }}
-  notify: restart mysql
+- name: Check if MySQL packages were installed.
+  set_fact:
+    mysql_install_packages: "{{ (rh_mysql_install_packages is defined and rh_mysql_install_packages.changed)
+      or (deb_mysql_install_packages is defined and deb_mysql_install_packages.changed)
+      or (arch_mysql_install_packages is defined and arch_mysql_install_packages.changed) }}"
 
-- name: create database
-  community.mysql.mysql_db:
-    name: wordpress
-    state: present
-  when: ansible_hostname == db01.{{ domaine_name }}
-
-- name: create user
-  community.mysql.mysql_user:
-    name: wordpress
-    password: wordpress
-    priv: "wordpress.*:ALL"
-    host: 192.168.10.20
-    state: present
-  when: ansible_hostname == db01.{{ domaine_name }}    
+# Configure MySQL.
+- include_tasks: configure.yml
+- include_tasks: secure-installation.yml
+- include_tasks: databases.yml
+- include_tasks: users.yml
+- include_tasks: replication.yml

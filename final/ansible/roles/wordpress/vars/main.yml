@@ -1,6 +1,6 @@
 ---
 php_modules: ['php-curl', 'php-gd', 'php-mbstring', 'php-xml', 'php-xmlrpc', 'php-soap', 'php-intl', 'php-zip']
-LAMP: ['apache2', 'python3-pymysql', 'php', 'php-mysql', 'libapache2-mod-php']
+LAMP: ['apache2', 'php', 'php-mysql', 'libapache2-mod-php']
 
 http_host: www.homopoluza.ru
 http_conf: www.homopoluza.ru.conf
@@ -9,4 +9,7 @@ http_port: 80
 mysql_db: "wordpress"
 mysql_user: "wordpress"
 mysql_password: "wordpress"
-mysql_server: db01.{{ domaine_name }}
+mysql_server: db01.homopoluza.ru
+mysql_root_password: "root"
+
+domain_name: homopoluza.ru

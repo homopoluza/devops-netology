@@ -1,8 +1,16 @@
 ---
-- name: Install grafana
-  yum:
-    name: https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana-{{ version }}-1.x86_64.rpm
-    state: latest
+- name: download GPG key
+  ansible.builtin.shell: " wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add - "
+
+- name: add grafana repository
+  become: true
+  ansible.builtin.shell: add-apt-repository "deb https://packages.grafana.com/oss/deb stable main"
+  
+- name: install grafana
+  become: true
+  ansible.builtin.apt:
+    name: grafana
+    update_cache: yes
 
 - name: "Grafana configuration file copy"
   template:
@@ -16,8 +24,8 @@
     enabled: true
     state: started
 
-- name: "Check if Grafana is accessible."
-  uri:
-    url: http://127.0.0.1:3000
-    method: GET
-    status_code: 200
+# - name: "Check if Grafana is accessible."
+#   uri:
+#     url: http://127.0.0.1:3000
+#     method: GET
+#     status_code: 200

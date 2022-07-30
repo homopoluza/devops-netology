@@ -1,33 +1,47 @@
 ---
-# - hosts: homopoluza.ru
-#   remote_user: ubuntu
-#   roles:
-#   - rev_proxy
+- hosts: rev_proxy
+  remote_user: ubuntu
+  roles:
+  - rev_proxy
+  - nat
 
-# - hosts: mqsql
-#   remote_user: ubuntu
-#   roles:
-#   - mysql
+- hosts: mysql
+  remote_user: ubuntu
+  become: true
+  vars:
+    ansible_host_key_checking: false
+  roles:
+  - mysql    
 
 - hosts: wordpress
   remote_user: ubuntu
+  become: true
   roles:
   - wordpress
 
-# - hosts: gitlab.homopoluza.ru
-#   remote_user: ubuntu
-#   roles:
-#   - gitlab-ce
+- hosts: gitlab.homopoluza.ru
+  remote_user: ubuntu
+  become: true
+  roles:
+  - gitlab-ce
 
-# - hosts: runner.homopoluza.ru
-#   remote_user: ubuntu
-#   roles:
-#   - gitlab-runner
+- hosts: runner.homopoluza.ru
+  remote_user: ubuntu
+  become: true
+  roles:
+  - gitlab-runner
 
-# - hosts: monitoring
-#   remote_user: ubuntu
-#   roles:
-#   - node-exporter
-#   - prometheus
-#   - alertmanager
-#   - grafana
+- hosts: all
+  tags: node-exporter
+  become: true
+  remote_user: ubuntu
+  roles:
+    - node-exporter
+
+- hosts: monitoring
+  become: true
+  remote_user: ubuntu
+  roles:
+    #- alertmanager
+    - prometheus
+    #- grafana

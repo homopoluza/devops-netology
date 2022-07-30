@@ -1,0 +1,20 @@
+- name: enable masquerade NAT
+  become: true
+  ansible.builtin.iptables:
+    table: nat
+    chain: POSTROUTING
+    out_interface: eth0
+    jump: MASQUERADE
+
+- name: enable ip_forwarding
+  become: true
+  ansible.builtin.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    sysctl_set: yes
+    state: present
+    reload: yes
+
+- name: copy ssh-key to the gitlab-runner
+  ansible.builtin.shell:
+    rsync -v -e ssh /home/ubuntu/.ssh/id_rsa ubuntu@runner.homopoluza.ru:/home/ubuntu/.ssh/id_rsa
