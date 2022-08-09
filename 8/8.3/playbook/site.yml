@@ -1,0 +1,7 @@
+---
+- hosts: elasticsearch
+  roles:
+  - elastic-role
+- hosts: kibana
+  roles:
+  - kibana-role

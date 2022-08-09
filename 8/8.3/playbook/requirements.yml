@@ -1,0 +1,9 @@
+---
+  - src: git@github.com:homopoluza/elastic-role.git
+    scm: git
+    version: "1.0.0"
+    name: elastic-role
+  - src: git@github.com:homopoluza/kibana-role.git
+    scm: git
+    version: "1.0.0"
+    name: kibana-role 
