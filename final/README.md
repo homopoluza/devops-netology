@@ -115,11 +115,15 @@ Terraform сконфигурирован и создание инфрастру�
 
 В вашей доменной зоне настроены все A-записи на внешний адрес этого сервера:
 
-https://www.you.domain (WordPress)  
-https://gitlab.you.domain (Gitlab)  
-https://grafana.you.domain (Grafana)  
-https://prometheus.you.domain (Prometheus)  
-https://alertmanager.you.domain (Alert Manager)  
+https://www.homopoluza.ru (WordPress)  
+https://gitlab.homopoluza.ru (Gitlab)  
+https://grafana.homopoluza.ru (Grafana)  
+https://prometheus.homopoluza.ru (Prometheus)  
+https://alertmanager.homopoluza.ru (Alert Manager)  
+
+![cert](https://github.com/homopoluza/devops-netology/blob/main/final/screenshots/5.png)
+![A](https://github.com/homopoluza/devops-netology/blob/main/final/screenshots/6.png)
+
 
 Настроены все upstream для выше указанных URL, куда они сейчас ведут на этом шаге не важно, позже вы их отредактируете и укажите верные значения.
 В браузере можно открыть любой из этих URL и увидеть ответ сервера (502 Bad Gateway). На текущем этапе выполнение задания это нормально!
@@ -141,6 +145,8 @@ https://alertmanager.you.domain (Alert Manager)
 ### Ожидаемые результаты:
 
 MySQL работает в режиме репликации Master/Slave.
+
+![mysql_ansible](https://github.com/homopoluza/devops-netology/blob/main/final/screenshots/7.png)
 
 ```
 mysql> show slave status\G;
@@ -184,7 +190,8 @@ mysql> SHOW GRANTS FOR wordpress;
 | GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, RELOAD, SHUTDOWN, PROCESS, FILE, REFERENCES, INDEX, ALTER, SHOW DATABASES, SUPER, CREATE TEMPORARY TABLES, LOCK TABLES, EXECUTE, REPLICATION SLAVE, REPLICATION CLIENT, CREATE VIEW, SHOW VIEW, CREATE ROUTINE, ALTER ROUTINE, CREATE USER, EVENT, TRIGGER, CREATE TABLESPACE, CREATE ROLE, DROP ROLE ON *.* TO `wordpress`@`%`                                                                                                                                                                                                                                                                                                                                                                 |
 | GRANT APPLICATION_PASSWORD_ADMIN,AUDIT_ABORT_EXEMPT,AUDIT_ADMIN,AUTHENTICATION_POLICY_ADMIN,BACKUP_ADMIN,BINLOG_ADMIN,BINLOG_ENCRYPTION_ADMIN,CLONE_ADMIN,CONNECTION_ADMIN,ENCRYPTION_KEY_ADMIN,FIREWALL_EXEMPT,FLUSH_OPTIMIZER_COSTS,FLUSH_STATUS,FLUSH_TABLES,FLUSH_USER_RESOURCES,GROUP_REPLICATION_ADMIN,GROUP_REPLICATION_STREAM,INNODB_REDO_LOG_ARCHIVE,INNODB_REDO_LOG_ENABLE,PASSWORDLESS_USER_ADMIN,PERSIST_RO_VARIABLES_ADMIN,REPLICATION_APPLIER,REPLICATION_SLAVE_ADMIN,RESOURCE_GROUP_ADMIN,RESOURCE_GROUP_USER,ROLE_ADMIN,SENSITIVE_VARIABLES_OBSERVER,SERVICE_CONNECTION_ADMIN,SESSION_VARIABLES_ADMIN,SET_USER_ID,SHOW_ROUTINE,SYSTEM_USER,SYSTEM_VARIABLES_ADMIN,TABLE_ENCRYPTION_ADMIN,XA_RECOVER_ADMIN ON *.* TO `wordpress`@`%` |
 +-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-2 rows in set (0.00 sec)```
+2 rows in set (0.00 sec)
+```
 
 Вы должны понимать, что в рамках обучения это допустимые значения, но в боевой среде использование подобных значений не приемлимо! Считается хорошей практикой использовать логины и пароли повышенного уровня сложности. В которых будут содержаться буквы верхнего и нижнего регистров, цифры, а также специальные символы!
 
@@ -206,9 +213,11 @@ mysql> SHOW GRANTS FOR wordpress;
 
 Виртуальная машина на которой установлен WordPress и Nginx/Apache (на ваше усмотрение).
 В вашей доменной зоне настроена A-запись на внешний адрес reverse proxy:
-https://www.you.domain (WordPress)
-На сервере you.domain отредактирован upstream для выше указанного URL и он смотрит на виртуальную машину на которой установлен WordPress.
-В браузере можно открыть URL https://www.you.domain и увидеть главную страницу WordPress.
+https://www.homopoluza.ru (WordPress)
+На сервере homopoluza.ru отредактирован upstream для выше указанного URL и он смотрит на виртуальную машину на которой установлен WordPress.
+В браузере можно открыть URL https://www.homopoluza.ru  и увидеть главную страницу WordPress.
+
+![wordpress](https://github.com/homopoluza/devops-netology/blob/main/final/screenshots/8.png)
 
 ## 6. Установка Gitlab CE и Gitlab Runner
 
@@ -227,10 +236,17 @@ https://www.you.domain (WordPress)
 ### Ожидаемый результат:
 
 Интерфейс Gitlab доступен по https.
+
+![gitlab](https://github.com/homopoluza/devops-netology/blob/main/final/screenshots/9.png)
+
 В вашей доменной зоне настроена A-запись на внешний адрес reverse proxy:
-https://gitlab.you.domain (Gitlab)
+https://gitlab.homopoluza.ru (Gitlab)
 На сервере you.domain отредактирован upstream для выше указанного URL и он смотрит на виртуальную машину на которой установлен Gitlab.
 При любом коммите в репозиторий с WordPress и создании тега (например, v1.0.0) происходит деплой на виртуальную машину.
+
+![gitlab](https://github.com/homopoluza/devops-netology/blob/main/final/screenshots/10.png)
+![gitlab](https://github.com/homopoluza/devops-netology/blob/main/final/screenshots/11.png)
+![gitlab](https://github.com/homopoluza/devops-netology/blob/main/final/screenshots/12.png)
 
 ## 7. Установка Prometheus, Alert Manager, Node Exporter и Grafana
 
@@ -250,27 +266,16 @@ https://gitlab.you.domain (Gitlab)
 Интерфейсы Prometheus, Alert Manager и Grafana доступены по https.
 В вашей доменной зоне настроены A-записи на внешний адрес reverse proxy:
 
-• https://grafana.you.domain (Grafana)  
-• https://prometheus.you.domain (Prometheus)  
-• https://alertmanager.you.domain (Alert Manager)  
+• https://grafana.homopoluza.ru (Grafana)  
+• https://prometheus.homopoluza.ru (Prometheus)  
+• https://alertmanager.homopoluza.ru (Alert Manager)  
 
 На сервере you.domain отредактированы upstreams для выше указанных URL и они смотрят на виртуальную машину на которой установлены Prometheus, Alert Manager и Grafana.
 На всех серверах установлен Node Exporter и его метрики доступны Prometheus.
 У Alert Manager есть необходимый набор правил для создания алертов.
 В Grafana есть дашборд отображающий метрики из Node Exporter по всем серверам.
-В Grafana есть дашборд отображающий метрики из MySQL (*).
-В Grafana есть дашборд отображающий метрики из WordPress (*).
-Примечание: дашборды со звёздочкой являются опциональными заданиями повышенной сложности их выполнение желательно, но не обязательно.
 
-## Что необходимо для сдачи задания?
-
-Репозиторий со всеми Terraform манифестами и готовность продемонстрировать создание всех ресурсов с нуля.
-Репозиторий со всеми Ansible ролями и готовность продемонстрировать установку всех сервисов с нуля.
-Скриншоты веб-интерфейсов всех сервисов работающих по HTTPS на вашем доменном имени.
-
-https://www.you.domain (WordPress)  
-https://gitlab.you.domain (Gitlab)  
-https://grafana.you.domain (Grafana)  
-https://prometheus.you.domain (Prometheus)  
-https://alertmanager.you.domain (Alert Manager)  
-Все репозитории рекомендуется хранить на одном из ресурсов (github.com или gitlab.com).
+![monitor](https://github.com/homopoluza/devops-netology/blob/main/final/screenshots/Screenshot%202022-07-30%20004217.png)
+![monitor](https://github.com/homopoluza/devops-netology/blob/main/final/screenshots/Screenshot%202022-07-30%20025503.png)
+![monitor](https://github.com/homopoluza/devops-netology/blob/main/final/screenshots/Screenshot%202022-07-30%20025414.png)
+![monitor](https://github.com/homopoluza/devops-netology/blob/main/final/screenshots/Screenshot%202022-07-30%20025124.png)
